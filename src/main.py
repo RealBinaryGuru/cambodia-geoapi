@@ -10,7 +10,7 @@ app = FastAPI()
 @app.get("/provinces")
 def get_provinces(name: str = Query(None, description="Name of the province to search for")):
     current_dir = Path(__file__).parent
-    file_path = current_dir / "data" / "CambodiaProvinceList2023.csv"
+    file_path = current_dir / "data" / "Province.csv"
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -46,7 +46,7 @@ def get_provinces(name: str = Query(None, description="Name of the province to s
 @app.get("/provinces/{code}")
 def get_province_by_code(code: str):
     current_dir = Path(__file__).parent
-    file_path = current_dir / "data" / "CambodiaProvinceList2023.csv"
+    file_path = current_dir / "data" / "Province.csv"
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
