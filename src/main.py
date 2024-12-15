@@ -168,3 +168,101 @@ def get_districts_by_province_id(province_id: str):
 
     except Exception as e:
         return BaseResponse.error(message=f"An unexpected error occurred: {str(e)}", status_code=500)
+
+
+@app.get("/communes", tags=['Communes'])
+def get_communes(name: str = Query(None, description="Name of the commune to search for")):
+    current_dir = Path(__file__).parent
+    file_path = current_dir / "data" / "Commune.csv"
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            csv_reader = csv.reader(f)
+            next(csv_reader)
+            communes = [
+                {
+                    "type": row[0],
+                    "code": row[1],
+                    "name_km": row[2],
+                    "name_en": row[3],
+                    "district_id": row[4],
+                }
+                for row in csv_reader
+            ]
+
+        if name:
+            communes = [
+                commune for commune in communes
+                if name.lower() in commune["name_en"].lower() or name.lower() in commune["name_km"].lower()
+            ]
+
+            if not communes:
+                return BaseResponse.error(message="No matching communes found", status_code=404)
+
+            return BaseResponse.success(message="Matching communes retrieved successfully", data=communes)
+
+        return BaseResponse.success(message="Data retrieved successfully", data=communes)
+
+    except Exception as e:
+        return BaseResponse.error(message=f"An unexpected error occurred: {str(e)}", status_code=500)
+
+
+@app.get("/communes/{code}", tags=['Communes'])
+def get_commune_by_code(code: str):
+    current_dir = Path(__file__).parent
+    file_path = current_dir / "data" / "Commune.csv"
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            csv_reader = csv.reader(f)
+            next(csv_reader)
+            for row in csv_reader:
+                if row[1] == code:
+                    commune = {
+                        "type": row[0],
+                        "code": row[1],
+                        "name_km": row[2],
+                        "name_en": row[3],
+                        "district_id": row[4],
+                    }
+                    return BaseResponse.success(message="Commune retrieved successfully", data=commune)
+
+        return BaseResponse.error(message="Commune with the specified code not found", status_code=404)
+
+    except Exception as e:
+        return BaseResponse.error(message=f"An unexpected error occurred: {str(e)}", status_code=500)
+
+
+@app.get("/communes/district/{district_id}", tags=['Communes'])
+def get_communes_by_district_id(district_id: str):
+    current_dir = Path(__file__).parent
+    file_path = current_dir / "data" / "Commune.csv"
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            csv_reader = csv.reader(f)
+            next(csv_reader)
+            communes = [
+                {
+                    "type": row[0],
+                    "code": row[1],
+                    "name_km": row[2],
+                    "name_en": row[3],
+                    "district_id": row[4],
+                }
+                for row in csv_reader
+                if row[4] == district_id
+            ]
+
+        if not communes:
+            return BaseResponse.error(
+                message=f"No communes found for district_id {district_id}", status_code=404
+            )
+
+        return BaseResponse.success(
+            message=f"Communes for district_id {district_id} retrieved successfully",
+            data=communes,
+        )
+
+    except Exception as e:
+        return BaseResponse.error(message=f"An unexpected error occurred: {str(e)}", status_code=500)
